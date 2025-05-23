@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils import timezone
 
 
 class Genre(models.Model):
@@ -65,16 +64,14 @@ class User(AbstractUser):
 
 
 class Order(models.Model):
-    created_at = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
 
     class Meta:
         ordering = ["-created_at"]
 
-
-    def __str__(self):
-        return self.created_at.strftime('%Y-%m-%d %H:%M:%S')
+    def __str__(self) -> str:
+        return self.created_at.strftime("%Y-%m-%d %H:%M:%S")
 
 
 class Ticket(models.Model):
@@ -88,16 +85,21 @@ class Ticket(models.Model):
     row = models.IntegerField()
     seat = models.IntegerField()
 
-    def clean(self):
+    def clean(self) -> None:
         if not 1 <= self.row <= self.movie_session.cinema_hall.rows:
-            raise ValidationError({"row": f'row number must be in available range: (1, rows): (1, {self.movie_session.cinema_hall.rows})'})
+            raise ValidationError(
+                {"row": f"row number must be in available range:"
+                        f" (1, rows): (1, "
+                        f"{self.movie_session.cinema_hall.rows})"})
         if not 1 <= self.seat <= self.movie_session.cinema_hall.seats_in_row:
-            raise ValidationError({"seat": f'seat number must be in available range: (1, seats_in_row): (1, {self.movie_session.cinema_hall.seats_in_row})'})
+            raise ValidationError(
+                {"seat": f"seat number must be in available range:"
+                         f" (1, seats_in_row): (1, "
+                         f"{self.movie_session.cinema_hall.seats_in_row})"})
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         super().full_clean()
         return super().save(*args, **kwargs)
-
 
     class Meta:
         constraints = [
@@ -106,10 +108,7 @@ class Ticket(models.Model):
                 name="unique_ticket")
         ]
 
-
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"{self.movie_session.movie.title} "
-                f"{self.movie_session.show_time.strftime('%Y-%m-%d %H:%M:%S')} "
-                f"(row: {self.row}, seat: {self.seat})")
-
-
+                f"{self.movie_session.show_time.strftime('%Y-%m-%d %H:%M:%S')}"
+                f" (row: {self.row}, seat: {self.seat})")
