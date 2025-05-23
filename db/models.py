@@ -98,7 +98,7 @@ class Ticket(models.Model):
                          f"{self.movie_session.cinema_hall.seats_in_row})"})
 
     def save(self, *args, **kwargs) -> None:
-        super().full_clean()
+        self.full_clean()
         return super().save(*args, **kwargs)
 
     class Meta:

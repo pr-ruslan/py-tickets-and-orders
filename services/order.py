@@ -7,7 +7,7 @@ from db.models import Order, Ticket, User, MovieSession
 
 def create_order(tickets: list[dict],
                  username: str,
-                 date: str = None) -> None:
+                 date: str = None) -> Order:
     with transaction.atomic():
         new_order = Order.objects.create(
             user=User.objects.get(username=username))
